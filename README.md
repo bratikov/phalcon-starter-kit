@@ -48,7 +48,7 @@ The root of the application contains configuration and launch scripts, CI/CD job
 ### Containers
 The project includes (in my opinion) only the basic containers necessary to run a basic API-based application. You always have the option to extend your application with the functionality required to implement specific business logic. All of them are described in the docker-compose.yml file. Below is a list of services and a brief description of their purpose:
 + **mysql** - MySQL database, persistent storage is mounted to the `volumes` folder
-+ **fpm** - PHP-FPM based on a custom image (PHP8.3) that includes Phalcon (version 5.8 at the time of writing), pdo_mysql, redis, swoole, decimal, and basic extensions. You can browse images repository and find images for lower PHP version as well - https://hub.docker.com/repository/docker/bratikov/php/general. If something is missing, you can install it by extending the base image (a slow method for updating and rebuilding) or by building your own image.
++ **fpm** - PHP-FPM based on a custom image (PHP8.3) that includes Phalcon (version 5.8 at the time of writing), pdo_mysql, redis, swoole, decimal, and basic extensions. You can browse images repository and find images for lower PHP version as well - https://hub.docker.com/r/bratikov/php/tags. If something is missing, you can install it by extending the base image (a slow method for updating and rebuilding) or by building your own image.
 + **nginx** - internal proxy service for fpm
 + **redis** - Redis server, it could have been excluded from the basic build, but it is very often used. Persistent storage is also mounted to `volumes`
 + **pma** - PHPMyAdmin comes out of the box for convenient database viewing
