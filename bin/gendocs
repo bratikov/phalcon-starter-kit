@@ -1,0 +1,10 @@
+#!/bin/bash
+RED=$'\e[31m'
+GREEN=$'\e[32m'
+YELLOW=$'\e[33m'
+BLUE=$'\e[34m'
+RESET=$'\e[0m'
+
+docker compose exec fpm sh -c '/var/www/html/app/vendor/bin/openapi --version 3.1.0 --output /var/www/html/app/docs/api_v1.json --bootstrap /var/www/html/app/config/loader.php /var/www/html/app/src/Endpoints/v1 /var/www/html/app/src/Models'
+docker compose exec fpm sh -c '/var/www/html/app/vendor/bin/openapi --version 3.1.0 --output /var/www/html/app/docs/api_v2.json --bootstrap /var/www/html/app/config/loader.php /var/www/html/app/src/Endpoints/v2 /var/www/html/app/src/Models'
+echo "${GREEN}API documentation has been generated${RESET}"

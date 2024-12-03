@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+echo "======== Executing unit tests ========"
+docker compose exec fpm sh -c "php /var/www/html/app/vendor/bin/phpunit --configuration /var/www/html/app/tests/phpunit.xml --do-not-cache-result"
+echo "${GOOD}======== Done! ========${NORMAL}"

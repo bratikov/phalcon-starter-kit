@@ -1,0 +1,102 @@
+services:
+  mysql:
+    build: docker/mysql
+    container_name: mysql
+    hostname: mysql
+    volumes:
+      - ./volumes/mysql/data:/var/lib/mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+      - TZ=${TIMEZONE}
+    networks:
+      app:
+        ipv4_address: 172.31.${IPPREF}.2
+    restart: always
+
+  fpm:
+    build: docker/fpm
+    container_name: fpm
+    hostname: fpm
+    volumes:
+      - ./app:/var/www/html/app
+    environment:
+      - TZ=${TIMEZONE}
+      - APPENV=${APPENV}
+    networks:
+      app:
+        ipv4_address: 172.31.${IPPREF}.3
+    restart: always
+
+  nginx:
+    build: docker/nginx
+    container_name: nginx
+    hostname: nginx
+    volumes:
+      - ./app:/var/www/html/app
+    environment:
+      - TZ=${TIMEZONE}
+    ports:
+      - 127.0.0.1:5${SUID}${APP_DPORT}:888
+    networks:
+      app:
+        ipv4_address: 172.31.${IPPREF}.4
+    restart: always
+
+  redis:
+    image: redis:7.2.4-alpine
+    container_name: redis
+    hostname: redis
+    command: /bin/sh -c "redis-server --requirepass ${REDIS_PASSWORD}"
+    volumes:
+      - ./volumes/redis/data:/data
+    environment:
+      - TZ=${TIMEZONE}
+    networks:
+      app:
+        ipv4_address: 172.31.${IPPREF}.5
+    restart: always
+
+  pma:
+    image: phpmyadmin:latest
+    container_name: pma
+    hostname: pma
+    environment:
+      - TZ=${TIMEZONE}
+      - PMA_HOST=mysql
+      - PMA_PORT=3306
+    ports:
+      - 127.0.0.1:5${SUID}${PMA_DPORT}:80
+    networks:
+      app:
+        ipv4_address: 172.31.${IPPREF}.6
+    depends_on:
+      - mysql
+    restart: always
+
+  swagger:
+    image: swaggerapi/swagger-ui:latest
+    container_name: swagger
+    hostname: swagger
+    ports:
+      - 127.0.0.1:5${SUID}${DOC_DPORT}:8080
+    volumes:
+      - ./app/docs/api_v1.json:/v1.json
+      - ./app/docs/api_v2.json:/v2.json
+    environment:
+      - SWAGGER_JSON=/v1.json
+      - TZ=${TIMEZONE}
+    networks:
+      app:
+        ipv4_address: 172.31.${IPPREF}.7
+    restart: always
+
+networks:
+  app:
+    name: app
+    enable_ipv6: false
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.31.${IPPREF}.0/27
+          gateway: 172.31.${IPPREF}.1

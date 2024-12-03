@@ -1,0 +1,34 @@
+#!/usr/bin/env bash
+source .project
+source $APPPATH/bin/misc
+source $APPPATH/bin/env
+
+if [ -z "$APPPATH" ]; then
+    echo "${RED}No APPPATH environment set, please run ./configure first${RESET}"
+    exit 1
+fi
+
+echo "${YELLOW}Preparing application environment config files${RESET}"
+find $APPPATH -type d \( -name .git -o -name volumes \) -prune -o -type f -name '*sample*' ! -name "*$APPENV*" -print | while read -r file; do
+  t=$(echo "$file" | sed "s/sample/$APPENV/")
+  echo $t
+  replace_placeholders "$file" "$t"
+done
+echo "${GREEN}Done${RESET}"
+
+read -p "${YELLOW}You are going to build on ${GREEN}${APPENV}${YELLOW} environment. Proceed? (y/n): ${RESET}" answer
+if [[ "$answer" == "n" ]]; then
+    echo "${RED}Aborted${RESET}"
+    exit 0
+fi
+
+echo "${YELLOW}Building containers${RESET}"
+docker compose $ENVPARAMS down
+docker compose $ENVPARAMS build $BUILDARGS
+docker compose $ENVPARAMS up -d
+wait_mysql
+composer_install
+echo "${YELLOW}Applying database migrations${RESET}"
+$APPPATH/bin/migration run
+echo "${GREEN}Done${RESET}"
+docker compose $ENVPARAMS ps

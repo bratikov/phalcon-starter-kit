@@ -1,0 +1,424 @@
+{
+    "openapi": "3.1.0",
+    "info": {
+        "title": "App",
+        "description": "Your awesome REST API application",
+        "contact": {
+            "email": "email@example.com"
+        },
+        "version": "v1"
+    },
+    "servers": [
+        {
+            "url": "http://test.local/v1",
+            "description": "Test server"
+        }
+    ],
+    "paths": {
+        "/dummy": {
+            "get": {
+                "tags": [
+                    "Dummy"
+                ],
+                "summary": "List of dummy records",
+                "operationId": "cab241cbda2aac87aadc8cc4e124a534",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "code": {
+                                            "type": "integer",
+                                            "example": 200
+                                        },
+                                        "status": {
+                                            "type": "string",
+                                            "example": "OK"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Request completed successfully"
+                                        },
+                                        "payload": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/Dummy"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Dummy"
+                ],
+                "summary": "Add new dummy record",
+                "operationId": "eb02e2945b70b707f5734a94d63b08b6",
+                "requestBody": {
+                    "description": "Dummy object",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/DummyRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "code": {
+                                            "type": "integer",
+                                            "example": 200
+                                        },
+                                        "status": {
+                                            "type": "string",
+                                            "example": "OK"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Request completed successfully"
+                                        },
+                                        "payload": {
+                                            "$ref": "#/components/schemas/Dummy"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "code": {
+                                            "type": "integer",
+                                            "example": 400
+                                        },
+                                        "status": {
+                                            "type": "string",
+                                            "example": "Bad Request"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Validation error(s)"
+                                        },
+                                        "payload": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "string",
+                                                "example": "some validation error"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/dummy/{id}": {
+            "get": {
+                "tags": [
+                    "Dummy"
+                ],
+                "summary": "Dummy info",
+                "operationId": "c277afe531df811550bfe21341772ae9",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID of record",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "code": {
+                                            "type": "integer",
+                                            "example": 200
+                                        },
+                                        "status": {
+                                            "type": "string",
+                                            "example": "OK"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Request completed successfully"
+                                        },
+                                        "payload": {
+                                            "$ref": "#/components/schemas/Dummy"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "code": {
+                                            "type": "integer",
+                                            "example": 400
+                                        },
+                                        "status": {
+                                            "type": "string",
+                                            "example": "Bad Request"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Requested item not found"
+                                        },
+                                        "payload": {
+                                            "example": "[]"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "put": {
+                "tags": [
+                    "Dummy"
+                ],
+                "summary": "Update dummy record",
+                "operationId": "2ae84924169bfb3886277abe38ebf3c5",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID of dummy record",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "description": "Dummy object",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/DummyRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "code": {
+                                            "type": "integer",
+                                            "example": 200
+                                        },
+                                        "status": {
+                                            "type": "string",
+                                            "example": "OK"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Request completed successfully"
+                                        },
+                                        "payload": {
+                                            "$ref": "#/components/schemas/Dummy"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "code": {
+                                            "type": "integer",
+                                            "example": 400
+                                        },
+                                        "status": {
+                                            "type": "string",
+                                            "example": "Bad Request"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Requested item not found"
+                                        },
+                                        "payload": {
+                                            "example": "[]"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "Dummy"
+                ],
+                "summary": "Delete dummy record",
+                "operationId": "939f408056e78e1c1ecb532363eeb3d0",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID of dummy record",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "code": {
+                                            "type": "integer",
+                                            "example": 200
+                                        },
+                                        "status": {
+                                            "type": "string",
+                                            "example": "OK"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Request completed successfully"
+                                        },
+                                        "payload": {
+                                            "example": "[]"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "code": {
+                                            "type": "integer",
+                                            "example": 400
+                                        },
+                                        "status": {
+                                            "type": "string",
+                                            "example": "Bad Request"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Requested item not found"
+                                        },
+                                        "payload": {
+                                            "example": "[]"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "DummyRequest": {
+                "title": "Dummy request model",
+                "properties": {
+                    "name": {
+                        "type": "string",
+                        "format": "string",
+                        "example": "Dummy"
+                    }
+                },
+                "type": "object"
+            },
+            "Dummy": {
+                "title": "Dummy response model",
+                "description": "Dummy.",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "format": "int64",
+                        "example": 1
+                    },
+                    "name": {
+                        "type": "string",
+                        "format": "string",
+                        "example": "Basic"
+                    },
+                    "updatedAt": {
+                        "type": "string",
+                        "format": "DateTime",
+                        "example": "2020-09-08 20:00:00"
+                    },
+                    "createdAt": {
+                        "type": "string",
+                        "format": "DateTime",
+                        "example": "2020-09-08 20:00:00"
+                    }
+                },
+                "type": "object"
+            }
+        }
+    },
+    "tags": [
+        {
+            "name": "Dummy",
+            "description": "Dummy endpoints"
+        }
+    ]
+}

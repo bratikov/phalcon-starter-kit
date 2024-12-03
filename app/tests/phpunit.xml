@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" bootstrap="../config/loader.php" backupGlobals="true" colors="true" testdox="true" displayDetailsOnTestsThatTriggerWarnings="true" stopOnFailure="true" displayDetailsOnPhpunitDeprecations="true">
+    <testsuites>
+        <testsuite name="App">
+            <directory>App</directory>
+        </testsuite>
+    </testsuites>
+
+    <source restrictWarnings="false">
+        <include>
+            <directory>src</directory>
+        </include>
+    </source>
+</phpunit>

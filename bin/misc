@@ -1,0 +1,70 @@
+#!/usr/bin/env bash
+RED=$'\e[31m'
+GREEN=$'\e[32m'
+YELLOW=$'\e[33m'
+BLUE=$'\e[34m'
+RESET=$'\e[0m'
+
+loading_bar() {
+    local duration=$1
+    local interval=1
+    local elapsed=0
+
+    while [ $elapsed -lt $duration ]; do
+        printf "\r["
+        for ((i=0; i<$elapsed; i++)); do
+            printf "="
+        done
+        for ((i=$elapsed; i<$duration; i++)); do
+            printf " "
+        done
+        printf "] %d%%" $(( ($elapsed * 100) / $duration ))
+        sleep $interval
+        elapsed=$((elapsed + interval))
+    done
+    printf "\n"
+}
+
+wait_mysql() {
+    MAX_WAIT=60
+    elapsed=0
+    while ! docker compose exec mysql bash -c "mysqladmin ping -uroot -p${MYSQL_ROOT_PASSWORD} 2>&1 | grep -v Warning" | grep -q "mysqld is alive"; do
+        if [ $elapsed -ge $MAX_WAIT ]; then
+            echo "${RED}MySQL did not start within $MAX_WAIT seconds.${RESET}"
+            exit 1
+        fi
+        printf "\r${YELLOW}Waiting for MySQL to start: %d seconds${RESET}" $elapsed
+        sleep 1
+        elapsed=$((elapsed + 1))
+    done
+    echo ""
+    echo "${GREEN}MySQL is up and running.${RESET}"
+}
+
+replace_placeholders() {
+  local file=$1
+  local target=$2
+
+  # Read the content of the sample file
+  content=$(cat "$file")
+
+  # Loop through all environment variables
+  while IFS='=' read -r key value; do
+    # Skip comments and empty lines
+    if [[ ! "$key" =~ ^# && -n "$key" ]]; then
+      # Escape special characters in the value
+      escaped_value=$(printf '%s\n' "$value" | sed -e 's/[\/&]/\\&/g')
+      # Replace placeholders with environment variables
+      content=$(echo "$content" | sed "s/##$key##/$escaped_value/g")
+    fi
+  done < .env
+
+  # Write the new content to the target file
+  echo "$content" > "$target"
+}
+
+composer_install() {
+  echo "${YELLOW}Installing vendors${RESET}"
+  docker compose $ENVPARAMS exec fpm sh -c "composer --working-dir=/var/www/html/app install"
+  echo "${GREEN}Done${RESET}"
+}

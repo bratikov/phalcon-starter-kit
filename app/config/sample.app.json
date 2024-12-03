@@ -1,0 +1,21 @@
+{
+	"application": {
+        "sentryDsn": "##SENTRY_DSN##",
+        "enviroment": "##APPENV##",
+        "timeZone": "##TIMEZONE##"
+    },
+    "database": {
+		"adapter": "Mysql",
+		"host": "##MYSQL_HOST##",
+		"port": "##MYSQL_PORT##",
+		"username": "##MYSQL_USERNAME##",
+		"password": "##MYSQL_PASSWORD##",
+		"dbname": "##MYSQL_DBNAME##",
+		"charset": "utf8"
+	},
+    "redis": {
+        "host": "##REDIS_HOST##",
+        "port": "##REDIS_PORT##",
+        "password": "##REDIS_PASSWORD##"
+    }
+}

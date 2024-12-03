@@ -1,0 +1,13 @@
+parameters:
+  level: 9
+  paths:
+    - ../src
+    - ../tests
+    - ../public
+    - ../config
+  excludePaths:
+    - ../src/Models
+  bootstrapFiles:
+    - ./loader.php
+  scanDirectories:
+      - ../vendor/swoole

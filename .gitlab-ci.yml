@@ -1,0 +1,73 @@
+stages:
+  - tests
+# - deploy - implement your own deployment process(es)
+
+phpcs:
+  stage: tests
+  image: bratikov/php:8.3-fpm-alpine-phalcon5.8
+
+  script:
+    - composer --working-dir=app --optimize-autoloader install
+    - cf=$(git diff-tree --diff-filter=ACM --no-commit-id --name-only -r $CI_COMMIT_SHA | grep -E 'app/.*\.php$' || true)
+    - if [ -z "$cf" ]; then echo "No PHP files changed"; echo "[]" > phpcs.json; exit 0; fi
+    - echo $cf
+    - php -dmemory_limit=-1 app/vendor/bin/php-cs-fixer fix --dry-run --config app/config/csfixer.php --using-cache=no --path-mode=intersection --show-progress=none --no-interaction --format gitlab $(git diff-tree --diff-filter=ACM --no-commit-id --name-only -r $CI_COMMIT_SHA | grep -E 'app/.*\.php$') > phpcs.json 2>/dev/null
+  except: 
+    refs:
+      - stage
+      - master
+      - main
+  artifacts:
+    when: always
+    paths:
+      - phpcs.json
+    expire_in: 14 days
+    reports:
+      codequality: phpcs.json
+  # configure your own runner and specify here
+  tags:
+    - test
+
+phpstan:
+  stage: tests
+  image: bratikov/php:8.3-fpm-alpine-phalcon5.8
+  script:
+    - composer --working-dir=app --optimize-autoloader install
+    - cp app/config/sample.app.json app/config/local.app.json
+    - sed -i 's/##[^#]*##//g' app/config/local.app.json
+    - cf=$(git diff-tree --diff-filter=ACM --no-commit-id --name-only -r $CI_COMMIT_SHA | grep -E 'app/.*\.php$' || true)
+    - echo $cf
+    - if [ -z "$cf" ]; then echo "No PHP files changed"; echo "[]" > phpstan.json; exit 0; fi
+    - php -dmemory_limit=-1 app/vendor/bin/phpstan analyze --configuration app/config/phpstan.neon --error-format=gitlab --no-progress $(git diff-tree --diff-filter=ACM --no-commit-id --name-only -r $CI_COMMIT_SHA) > phpstan.json
+  except: 
+    refs:
+      - stage
+      - master
+      - main
+  artifacts:
+    when: always
+    paths:
+      - phpstan.json
+    expire_in: 14 days
+    reports:
+      codequality: phpstan.json
+  # configure your own runner and specify here
+  tags:
+    - test
+
+phpunit:
+  stage: tests
+  image: bratikov/php:8.3-fpm-alpine-phalcon5.8
+  script:
+    - composer --working-dir=app --optimize-autoloader install
+    - cp app/config/sample.app.json app/config/local.app.json
+    - sed -i 's/##[^#]*##//g' app/config/local.app.json
+    - php app/vendor/bin/phpunit --configuration app/tests/phpunit.xml --do-not-cache-result
+  except: 
+    refs:
+      - stage
+      - master
+      - main
+  # configure your own runner and specify here
+  tags:
+    - test

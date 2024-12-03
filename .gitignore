@@ -1,0 +1,10 @@
+.project
+.env
+app/vendor
+volumes/mysql/data
+volumes/redis/data
+app/config/*.app.json
+!app/config/sample.app.json
+docker/nginx/*.conf
+!docker/nginx/sample.conf
+!docker/nginx/app.conf

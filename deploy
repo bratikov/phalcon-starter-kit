@@ -1,0 +1,22 @@
+#!/bin/bash
+source .project
+source $APPPATH/bin/misc
+source $APPPATH/bin/env
+
+current_branch=$(git rev-parse --abbrev-ref HEAD)
+read -p "${YELLOW}You are going to deploy on ${GREEN}${APPENV}${YELLOW} environment (branch: ${GREEN}${current_branch}${YELLOW}). Proceed? (y/n): ${RESET}" answer
+case $answer in
+    [yY] ) echo "${GREEN}Proceeding with deployment${RESET}";;
+    [nN] ) echo "${RED}Deployment canceled.${RESET}"; exit 1;;
+    * ) echo "${RED}Invalid response. Deployment canceled.${RESET}"; exit 1;;
+esac
+echo "${YELLOW}Pulling changes from remote${RESET}"
+git pull 
+echo "${GREEN}Done${RESET}"
+composer_install
+echo "${YELLOW}Running migrations${RESET}"
+$APPPATH/bin/migration run
+echo "${GREEN}Done${RESET}"
+echo "${YELLOW}Restrarting docs container${RESET}"
+docker compose $ENVPARAMS restart swagger
+echo "${GREEN}Done${RESET}"

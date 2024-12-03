@@ -1,0 +1,16 @@
+{
+    "require-dev": {
+        "phalcon/ide-stubs": "^5.8",
+        "swoole/ide-helper": "^5.1",
+        "phpunit/phpunit": "^11.4",
+        "phalcon/migrations": "^3.0",
+        "friendsofphp/php-cs-fixer": "^3.65",
+        "phpstan/phpstan": "^2.0",
+        "doctrine/annotations": "^2.0",
+        "zircote/swagger-php": "^4.11"
+    },
+    "require": {
+        "guzzlehttp/guzzle": "^7.9",
+        "sentry/sdk": "^4.0"
+    }
+}

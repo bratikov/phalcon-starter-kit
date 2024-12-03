@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+RED=$'\e[31m'
+GREEN=$'\e[32m'
+YELLOW=$'\e[33m'
+BLUE=$'\e[34m'
+RESET=$'\e[0m'
+
+show_usage(){
+    echo "This script generates models for the project"
+    echo "Usage - $0 table"
+    echo "Where: "
+    echo "   table - table name you want to generate model for"
+    echo "An example for model generation: $0 dummy"
+    exit 1
+}
+
+if [ $# -lt 1 ]
+then
+    show_usage
+fi
+
+docker compose exec fpm sh -c "cd /var/www/html/app && phalcon-devtools model --force --config=config/migrations.php --namespace=\"App\\Models\" --extends=Base --output=src/Models --get-set --doc --camelize --mapcolumn --annotate --name=$1"

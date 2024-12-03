@@ -1,0 +1,30 @@
+#!/usr/bin/env bash
+RED=$'\e[31m'
+GREEN=$'\e[32m'
+YELLOW=$'\e[33m'
+BLUE=$'\e[34m'
+RESET=$'\e[0m'
+
+if [ $# -eq 0 ]
+then
+    changedFiles=$(git status --untracked-files=all --porcelain 2>&1 | grep -v warning | grep -vE ' D' | grep 'app/' | grep '\.php$' | sed 's/^...//')
+    echo "${YELLOW}================= Changed/Untracked files =================${RESET}"
+    echo "$changedFiles"
+    echo "${YELLOW}================= Changed/Untracked files =================${RESET}"
+    if [ -z "$changedFiles" ]
+    then
+        echo "${RED}No changed/untracked files found${RESET}"
+        exit 0
+    fi
+    echo "${GREEN}Going to fix changed/untracked files displayed above${RESET}"
+    changedFiles=$(echo $changedFiles | tr '\n' ' ')
+    docker compose exec fpm sh -c "php -dmemory_limit=-1 /var/www/html/app/vendor/bin/php-cs-fixer fix --config /var/www/html/app/config/csfixer.php -v --using-cache=no --path-mode=intersection $changedFiles"
+else
+    changedFiles=$(echo "$@" | tr ' ' '\n')
+    echo "${YELLOW}================= Selected files =================${RESET}"
+    echo "$changedFiles"
+    echo "${YELLOW}================= Selected files =================${RESET}"
+    echo "Going to fix manually selected files"
+    changedFiles=$(echo "$changedFiles" | tr '\n' ' ')
+    docker compose exec fpm sh -c "php -dmemory_limit=-1 /var/www/html/app/vendor/bin/php-cs-fixer fix --config /var/www/html/app/config/csfixer.php -v --using-cache=no --path-mode=intersection $changedFiles"
+fi

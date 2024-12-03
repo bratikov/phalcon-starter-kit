@@ -1,0 +1,12 @@
+{
+  "id": "cm42dt04c02mzm3kvz4kkun0o",
+  "v": 1,
+  "name": "test.local v2",
+  "variables": [
+    {
+      "key": "basepath",
+      "value": "http://test.local/v2",
+      "secret": false
+    }
+  ]
+}

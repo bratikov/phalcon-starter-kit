@@ -1,0 +1,40 @@
+#!/usr/bin/env bash
+RED=$'\e[31m'
+GREEN=$'\e[32m'
+YELLOW=$'\e[33m'
+BLUE=$'\e[34m'
+RESET=$'\e[0m'
+
+show_usage(){
+	echo "This script operates with migrations in the project"
+    echo "Usage - $0 run|list|generate"
+    echo "Where: "
+	echo "   run        - runs all non applied migrations on local environment"
+	echo "   list       - lists all available migrations on local environment"
+    echo "   generate   - generates migration based on existing DB schema"
+    echo "An example for generation: $0 generate"
+	exit 1
+}
+
+if [ $# -lt 1 ]
+then
+	show_usage
+fi
+
+if [ $1 = "run" ] || [ $1 = "list" ]
+then
+docker compose exec fpm sh -c "phalcon-migrations $1 --config=app/config/migrations.php"
+exit 0
+fi
+
+if [ $1 = "generate" ]; then
+    read -p "You want to generate migration, please provide table name: " tablename
+    if [ -z "$tablename" ]; then
+        echo -e "${RED}No table name provided. Aborted${RESET}"
+        show_usage
+    fi
+    docker compose exec fpm sh -c "phalcon-migrations --config=app/config/migrations.php --table=$tablename generate"
+    exit 0
+fi
+
+show_usage

@@ -1,0 +1,6 @@
+#!/bin/bash
+PARAMS=''
+for arg in "$@"; do
+  PARAMS="$PARAMS \"$arg\""
+done
+docker compose exec fpm sh -c "php /var/www/html/app/src/Tasks/cli.php $PARAMS"

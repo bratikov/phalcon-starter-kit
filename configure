@@ -1,0 +1,74 @@
+#!/usr/bin/env bash
+show_usage(){
+	echo "usage - $0 [target]"
+    echo "where: "
+    echo "   target:   [any]"
+	echo "             any target you want to build [stage, prod, whatever]"
+	echo "WARNING! Run this script just once for fresh installation"
+	exit 1
+}
+
+USER_DIR="/home/$(whoami)"
+APPPATH="$(pwd)"
+APPENV="local"
+source $APPPATH/bin/misc
+
+if [ -z "$1" ]; then
+    echo "${YELLOW}You want to configure with empty target, in this case app will use settings by default."
+    echo "This option is siutable for development environment.${RESET}"
+    read -p "Proceed? (y/n): " answer
+    if [[ "$answer" == "n" ]]; then
+        echo "${RED}Aborted${RESET}"
+        show_usage
+    fi
+else
+    APPENV=$1
+fi
+
+if [ ! -f ".env.$APPENV" ]; then
+    echo "${RED}No .env.$APPENV configuration file found. Create it first, fill it with necessary configuration, and try again.${RESET}"
+    exit 1
+fi
+
+echo "${YELLOW}Do you need rootless docker environment?"
+echo "This option enable docker to run containers without root."
+echo "If you already have docker rootless environment, or want to start your containers as root -  just skip it.${RESET}"
+read -p "Proceed? (y/n): " answer
+if [[ "$answer" == "y" ]]; then
+    echo -e "Enable linger for user $(whoami)"
+    loginctl enable-linger "$(whoami)"
+
+    echo -e "Installing Docker Rootless environment for user $(whoami)"
+    /usr/bin/dockerd-rootless-setuptool.sh install
+    echo "export DOCKER_HOST=unix:///run/user/$(id -u)/docker.sock" >> $USER_DIR/.bashrc
+fi  
+echo "APPPATH=$APPPATH" > .project
+echo "APPENV=$APPENV" >> .project
+
+read -p "${YELLOW}Enter your project FQDN (ex. starter.example.com): ${RESET}" PROJECT_NAME
+echo "SITENAME=$PROJECT_NAME" >> .project
+
+source $APPPATH/bin/env
+echo "Base configuration is done!"
+
+read -p "${YELLOW}Do you want to initialize empty database for your project? (y/n): ${RESET}" answer
+if [ "$answer" == "y" ]; then
+    echo "${YELLOW}Stopping all previously runned containers${RESET}"
+    docker compose $ENVPARAMS down
+    echo "${GREEN}Done${RESET}"
+    echo "${YELLOW}Building and starting MySQL container${RESET}"
+    docker compose $ENVPARAMS build $BUILDARGS mysql
+    docker compose $ENVPARAMS up -d mysql
+    echo "${GREEN}Done${RESET}"
+    wait_mysql
+    docker compose exec mysql bash -c "mysql -uroot -p${MYSQL_ROOT_PASSWORD} -e \"CREATE USER IF NOT EXISTS '${MYSQL_USERNAME}'@'%' IDENTIFIED BY '${MYSQL_PASSWORD}';\" 2>&1 | grep -v Warning"
+    docker compose exec mysql bash -c "mysql -uroot -p${MYSQL_ROOT_PASSWORD} -e \"DROP DATABASE IF EXISTS ${MYSQL_DBNAME};\" 2>&1 | grep -v Warning"
+    docker compose exec mysql bash -c "mysql -uroot -p${MYSQL_ROOT_PASSWORD} -e \"CREATE DATABASE ${MYSQL_DBNAME} DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;\" 2>&1 | grep -v Warning"
+    docker compose exec mysql bash -c "mysql -uroot -p${MYSQL_ROOT_PASSWORD} -e \"GRANT ALL on ${MYSQL_DBNAME}.* to '${MYSQL_USERNAME}'@'%';\" 2>&1 | grep -v Warning"
+    echo "${GREEN}Empty database created.${RESET}"
+    echo "${YELLOW}Stopping MySQL container${RESET}"
+    docker compose $ENVPARAMS down mysql
+    echo "${GREEN}MySQL container is down.${RESET}"
+fi
+
+echo -e "${GREEN}Configuration completed, please run ${YELLOW}source ~/.bashrc${GREEN} and then ${YELLOW}./build${GREEN} to build containers and start application${RESET}"
