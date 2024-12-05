@@ -32,12 +32,15 @@ jobs:
   phpstan:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Debug git diff
         run: |
           echo "Current SHA: ${{ github.sha }}"
-          git diff --name-only HEAD^ HEAD
+          git diff --name-only ${{ github.event.before }} ${{ github.event.after }}
 
       - name: Run PHPStan in Docker
         run: |
