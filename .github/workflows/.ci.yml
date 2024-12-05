@@ -44,6 +44,7 @@ jobs:
           cp app/config/sample.app.json app/config/local.app.json
           sed -i 's/##[^#]*##//g' app/config/local.app.json
           echo 'Copied and modified configuration.'
+          git diff-tree --diff-filter=ACM --no-commit-id --name-only -r ${{github.sha}}
           cf=\$(git diff-tree --diff-filter=ACM --no-commit-id --name-only -r ${{ github.sha }} | grep -E 'app/.*\.php$' || true)
           echo 'Changed files: ' \$cf
           if [ -z \"\$cf\" ]; then echo 'No PHP files changed'; echo '[]' > /workspace/phpstan.json; exit 0; fi
