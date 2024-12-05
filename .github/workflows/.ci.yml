@@ -12,16 +12,25 @@ jobs:
   phpcs:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Debug git diff
+        run: |
+          echo "Current SHA: ${{ github.sha }}"
+          git diff --name-only ${{ github.event.before }} ${{ github.event.after }}
+
       - name: Run PHPCS in Docker
         run: |
           docker run --rm -v ${{ github.workspace }}:/workspace -w /workspace bratikov/php:8.3-fpm-alpine-phalcon5.8 sh -c "
           git config --global --add safe.directory /workspace
           composer --working-dir=app --optimize-autoloader install
-          cf=\$(git diff-tree --diff-filter=ACM --no-commit-id --name-only -r ${{ github.sha }} | grep -E 'app/.*\.php$' || true)
-          echo \$cf
-          if [ -z \"\$cf\" ]; then echo \"No PHP files changed\"; echo \"[]\" > /workspace/phpcs.json; exit 0; fi
-          php -dmemory_limit=-1 app/vendor/bin/php-cs-fixer fix --dry-run --config app/config/csfixer.php --using-cache=no --path-mode=intersection --show-progress=none --no-interaction --format gitlab \$(git diff-tree --diff-filter=ACM --no-commit-id --name-only -r ${{ github.sha }}) > /workspace/phpcs.json 2>/dev/null
+          cf=\$(git diff --name-only ${{ github.event.before }} ${{ github.event.after }} | grep -E 'app/.*\.php$' || true)
+          echo 'Changed files: ' \$cf
+          if [ -z \"\$cf\" ]; then echo 'No PHP files changed'; echo '[]' > /workspace/phpcs.json; exit 0; fi
+          php -dmemory_limit=-1 app/vendor/bin/php-cs-fixer fix --dry-run --config app/config/csfixer.php --using-cache=no --path-mode=intersection --show-progress=none --no-interaction --format gitlab \$(git diff --name-only ${{ github.event.before }} ${{ github.event.after }}) > /workspace/phpcs.json 2>/dev/null
           "
       - name: Upload PHPCS results
         uses: actions/upload-artifact@v4
@@ -45,20 +54,14 @@ jobs:
       - name: Run PHPStan in Docker
         run: |
           docker run --rm -v ${{ github.workspace }}:/workspace -w /workspace bratikov/php:8.3-fpm-alpine-phalcon5.8 sh -c "
-          echo 'Starting Docker container...'
           git config --global --add safe.directory /workspace
-          echo 'Configured git safe directory.'
           composer --working-dir=app --optimize-autoloader install
-          echo 'Installed Composer dependencies.'
           cp app/config/sample.app.json app/config/local.app.json
           sed -i 's/##[^#]*##//g' app/config/local.app.json
-          echo 'Copied and modified configuration.'
-          git diff-tree --diff-filter=ACM --no-commit-id --name-only -r ${{github.sha}}
-          cf=\$(git diff-tree --diff-filter=ACM --no-commit-id --name-only -r ${{ github.sha }} | grep -E 'app/.*\.php$' || true)
+          cf=\$(git diff --name-only ${{ github.event.before }} ${{ github.event.after }} | grep -E 'app/.*\.php$' || true)
           echo 'Changed files: ' \$cf
           if [ -z \"\$cf\" ]; then echo 'No PHP files changed'; echo '[]' > /workspace/phpstan.json; exit 0; fi
-          php -dmemory_limit=-1 app/vendor/bin/phpstan analyze --configuration app/config/phpstan.neon --error-format=gitlab --no-progress \$(git diff-tree --diff-filter=ACM --no-commit-id --name-only -r ${{ github.sha }}) > /workspace/phpstan.json 2>/dev/null
-          echo 'PHPStan analysis complete.'
+          php -dmemory_limit=-1 app/vendor/bin/phpstan analyze --configuration app/config/phpstan.neon --error-format=gitlab --no-progress \$(git diff --name-only ${{ github.event.before }} ${{ github.event.after }}) > /workspace/phpstan.json 2>/dev/null
           "
       - name: Upload PHPStan results
         uses: actions/upload-artifact@v4
