@@ -17,6 +17,7 @@ jobs:
         run: |
           docker run --rm -v ${{ github.workspace }}:/workspace -w /workspace bratikov/php:8.3-fpm-alpine-phalcon5.8 sh -c "
           composer --working-dir=app --optimize-autoloader install
+          git config --global --add safe.directory /workspace
           cf=\$(git diff-tree --diff-filter=ACM --no-commit-id --name-only -r ${{ github.sha }} | grep -E 'app/.*\.php$' || true)
           if [ -z \"\$cf\" ]; then echo \"No PHP files changed\"; echo \"[]\" > /workspace/phpcs.json; exit 0; fi
           echo \$cf
@@ -38,6 +39,7 @@ jobs:
           composer --working-dir=app --optimize-autoloader install
           cp app/config/sample.app.json app/config/local.app.json
           sed -i 's/##[^#]*##//g' app/config/local.app.json
+          git config --global --add safe.directory /workspace
           cf=\$(git diff-tree --diff-filter=ACM --no-commit-id --name-only -r ${{ github.sha }} | grep -E 'app/.*\.php$' || true)
           if [ -z \"\$cf\" ]; then echo \"No PHP files changed\"; echo \"[]\" > /workspace/phpstan.json; exit 0; fi
           echo \$cf
