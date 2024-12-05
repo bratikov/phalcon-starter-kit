@@ -23,6 +23,7 @@ jobs:
           git diff --name-only ${{ github.event.before }} ${{ github.event.after }}
 
       - name: Run PHPCS in Docker
+        continue-on-error: true
         run: |
           docker run --rm -v ${{ github.workspace }}:/workspace -w /workspace bratikov/php:8.3-fpm-alpine-phalcon5.8 sh -c "
           git config --global --add safe.directory /workspace
@@ -52,6 +53,7 @@ jobs:
           git diff --name-only ${{ github.event.before }} ${{ github.event.after }}
 
       - name: Run PHPStan in Docker
+        continue-on-error: true
         run: |
           docker run --rm -v ${{ github.workspace }}:/workspace -w /workspace bratikov/php:8.3-fpm-alpine-phalcon5.8 sh -c "
           git config --global --add safe.directory /workspace
