@@ -22,6 +22,6 @@ final class SwooleTest extends TestCase
 				});
 			}
 		});
-		$this->assertEquals(3, $counter);
+		$this->assertEquals(3, 4);
 	}
 }

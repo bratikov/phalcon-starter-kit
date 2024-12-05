@@ -19,7 +19,8 @@ $eventsManager->attach(
 		// Implement your logic here, like authentication, etc.
 	}
 );
-
+echo $b;
+$a = array();
 $eventsManager->attach(
 	'micro:afterExecuteRoute',
 	function (Event $event, Micro $app) {
