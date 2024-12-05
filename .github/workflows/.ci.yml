@@ -33,6 +33,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
+      - name: Debug git diff
+        run: |
+          echo "Current SHA: ${{ github.sha }}"
+          git diff --name-only HEAD^ HEAD
+
       - name: Run PHPStan in Docker
         run: |
           docker run --rm -v ${{ github.workspace }}:/workspace -w /workspace bratikov/php:8.3-fpm-alpine-phalcon5.8 sh -c "
