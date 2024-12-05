@@ -40,9 +40,9 @@ jobs:
           composer --working-dir=app --optimize-autoloader install
           cp app/config/sample.app.json app/config/local.app.json
           sed -i 's/##[^#]*##//g' app/config/local.app.json
-          cf=\$(git diff-tree --diff-filter=ACM --no-commit-id --name-only -r ${{ github.sha }} | grep -E 'app/.*\.php$' || true)
-          echo \$cf
-          if [ -z \"\$cf\" ]; then echo \"No PHP files changed\"; echo \"[]\" > /workspace/phpstan.json; exit 0; fi
+          cf=$(git diff-tree --diff-filter=ACM --no-commit-id --name-only -r ${{ github.sha }} | grep -E 'app/.*\.php$' || true)
+          echo $cf
+          if [ -z \"$cf\" ]; then echo \"No PHP files changed\"; echo \"[]\" > /workspace/phpstan.json; exit 0; fi
           php -dmemory_limit=-1 app/vendor/bin/phpstan analyze --configuration app/config/phpstan.neon --error-format=gitlab --no-progress \$(git diff-tree --diff-filter=ACM --no-commit-id --name-only -r ${{ github.sha }}) > /workspace/phpstan.json 2>/dev/null
           "
       - name: Upload PHPStan results
