@@ -21,6 +21,7 @@ $eventsManager->attach(
 );
 echo $b;
 $a = array();
+
 $eventsManager->attach(
 	'micro:afterExecuteRoute',
 	function (Event $event, Micro $app) {

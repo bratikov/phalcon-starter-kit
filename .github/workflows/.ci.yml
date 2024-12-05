@@ -36,14 +36,19 @@ jobs:
       - name: Run PHPStan in Docker
         run: |
           docker run --rm -v ${{ github.workspace }}:/workspace -w /workspace bratikov/php:8.3-fpm-alpine-phalcon5.8 sh -c "
+          echo 'Starting Docker container...'
           git config --global --add safe.directory /workspace
+          echo 'Configured git safe directory.'
           composer --working-dir=app --optimize-autoloader install
+          echo 'Installed Composer dependencies.'
           cp app/config/sample.app.json app/config/local.app.json
           sed -i 's/##[^#]*##//g' app/config/local.app.json
-          cf=$(git diff-tree --diff-filter=ACM --no-commit-id --name-only -r ${{ github.sha }} | grep -E 'app/.*\.php$' || true)
-          echo $cf
-          if [ -z \"$cf\" ]; then echo \"No PHP files changed\"; echo \"[]\" > /workspace/phpstan.json; exit 0; fi
+          echo 'Copied and modified configuration.'
+          cf=\$(git diff-tree --diff-filter=ACM --no-commit-id --name-only -r ${{ github.sha }} | grep -E 'app/.*\.php$' || true)
+          echo 'Changed files: ' \$cf
+          if [ -z \"\$cf\" ]; then echo 'No PHP files changed'; echo '[]' > /workspace/phpstan.json; exit 0; fi
           php -dmemory_limit=-1 app/vendor/bin/phpstan analyze --configuration app/config/phpstan.neon --error-format=gitlab --no-progress \$(git diff-tree --diff-filter=ACM --no-commit-id --name-only -r ${{ github.sha }}) > /workspace/phpstan.json 2>/dev/null
+          echo 'PHPStan analysis complete.'
           "
       - name: Upload PHPStan results
         uses: actions/upload-artifact@v4
