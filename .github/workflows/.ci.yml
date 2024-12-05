@@ -16,11 +16,11 @@ jobs:
       - name: Run PHPCS in Docker
         run: |
           docker run --rm -v ${{ github.workspace }}:/workspace -w /workspace bratikov/php:8.3-fpm-alpine-phalcon5.8 sh -c "
-          composer --working-dir=app --optimize-autoloader install
           git config --global --add safe.directory /workspace
+          composer --working-dir=app --optimize-autoloader install
           cf=\$(git diff-tree --diff-filter=ACM --no-commit-id --name-only -r ${{ github.sha }} | grep -E 'app/.*\.php$' || true)
-          if [ -z \"\$cf\" ]; then echo \"No PHP files changed\"; echo \"[]\" > /workspace/phpcs.json; exit 0; fi
           echo \$cf
+          if [ -z \"\$cf\" ]; then echo \"No PHP files changed\"; echo \"[]\" > /workspace/phpcs.json; exit 0; fi
           php -dmemory_limit=-1 app/vendor/bin/php-cs-fixer fix --dry-run --config app/config/csfixer.php --using-cache=no --path-mode=intersection --show-progress=none --no-interaction --format gitlab \$(git diff-tree --diff-filter=ACM --no-commit-id --name-only -r ${{ github.sha }}) > /workspace/phpcs.json 2>/dev/null
           "
       - name: Upload PHPCS results
@@ -36,13 +36,13 @@ jobs:
       - name: Run PHPStan in Docker
         run: |
           docker run --rm -v ${{ github.workspace }}:/workspace -w /workspace bratikov/php:8.3-fpm-alpine-phalcon5.8 sh -c "
+          git config --global --add safe.directory /workspace
           composer --working-dir=app --optimize-autoloader install
           cp app/config/sample.app.json app/config/local.app.json
           sed -i 's/##[^#]*##//g' app/config/local.app.json
-          git config --global --add safe.directory /workspace
           cf=\$(git diff-tree --diff-filter=ACM --no-commit-id --name-only -r ${{ github.sha }} | grep -E 'app/.*\.php$' || true)
-          if [ -z \"\$cf\" ]; then echo \"No PHP files changed\"; echo \"[]\" > /workspace/phpstan.json; exit 0; fi
           echo \$cf
+          if [ -z \"\$cf\" ]; then echo \"No PHP files changed\"; echo \"[]\" > /workspace/phpstan.json; exit 0; fi
           php -dmemory_limit=-1 app/vendor/bin/phpstan analyze --configuration app/config/phpstan.neon --error-format=gitlab --no-progress \$(git diff-tree --diff-filter=ACM --no-commit-id --name-only -r ${{ github.sha }}) > /workspace/phpstan.json 2>/dev/null
           "
       - name: Upload PHPStan results
