@@ -1,0 +1,30 @@
+name: tests
+
+on:
+  push:
+    branches:
+      - '**'
+  pull_request:
+    branches-ignore:
+      - main
+
+jobs:
+  phpcs:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run PHPCS in Docker
+        run: |
+          docker run --rm -v ${{ github.workspace }}:/workspace -w /workspace bratikov/php:8.3-fpm-alpine-phalcon5.8 sh -c "
+          composer --working-dir=app --optimize-autoloader install
+          cf=\$(git diff-tree --diff-filter=ACM --no-commit-id --name-only -r ${{ github.sha }} | grep -E 'app/.*\.php$' || true)
+          if [ -z \"\$cf\" ]; then echo \"No PHP files changed\"; echo \"[]\" > /workspace/phpcs.json; exit 0; fi
+          echo \$cf
+          php -dmemory_limit=-1 app/vendor/bin/php-cs-fixer fix --dry-run --config app/config/csfixer.php --using-cache=no --path-mode=intersection --show-progress=none --no-interaction --format gitlab \$(git diff-tree --diff-filter=ACM --no-commit-id --name-only -r ${{ github.sha }}) > /workspace/phpcs.json 2>/dev/null
+          "
+
+      - name: Upload PHPCS results
+        uses: actions/upload-artifact@v4
+        with:
+          name: phpcs.json
+          path: phpcs.json
