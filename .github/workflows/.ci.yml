@@ -23,7 +23,7 @@ jobs:
           git diff --name-only ${{ github.event.before }} ${{ github.event.after }}
 
       - name: Run PHPCS in Docker
-        continue-on-error: true
+        id: phpcs
         run: |
           docker run --rm -v ${{ github.workspace }}:/workspace -w /workspace bratikov/php:8.3-fpm-alpine-phalcon5.8 sh -c "
           git config --global --add safe.directory /workspace
@@ -31,9 +31,10 @@ jobs:
           cf=\$(git diff --name-only ${{ github.event.before }} ${{ github.event.after }} | grep -E 'app/.*\.php$' || true)
           echo 'Changed files: ' \$cf
           if [ -z \"\$cf\" ]; then echo 'No PHP files changed'; echo '[]' > /workspace/phpcs.json; exit 0; fi
-          php -dmemory_limit=-1 app/vendor/bin/php-cs-fixer fix --dry-run --config app/config/csfixer.php --using-cache=no --path-mode=intersection --show-progress=none --no-interaction --format gitlab \$(git diff --name-only ${{ github.event.before }} ${{ github.event.after }}) > /workspace/phpcs.json 2>/dev/null
+          php -dmemory_limit=-1 app/vendor/bin/php-cs-fixer fix --dry-run --config app/config/csfixer.php --using-cache=no --path-mode=intersection --show-progress=none --no-interaction --format json \$(git diff --name-only ${{ github.event.before }} ${{ github.event.after }}) > /workspace/phpcs.json 2>/dev/null
           "
       - name: Upload PHPCS results
+        if: failure()
         uses: actions/upload-artifact@v4
         with:
           name: phpcs.json
@@ -53,7 +54,7 @@ jobs:
           git diff --name-only ${{ github.event.before }} ${{ github.event.after }}
 
       - name: Run PHPStan in Docker
-        continue-on-error: true
+        id: phpstan
         run: |
           docker run --rm -v ${{ github.workspace }}:/workspace -w /workspace bratikov/php:8.3-fpm-alpine-phalcon5.8 sh -c "
           git config --global --add safe.directory /workspace
@@ -63,9 +64,10 @@ jobs:
           cf=\$(git diff --name-only ${{ github.event.before }} ${{ github.event.after }} | grep -E 'app/.*\.php$' || true)
           echo 'Changed files: ' \$cf
           if [ -z \"\$cf\" ]; then echo 'No PHP files changed'; echo '[]' > /workspace/phpstan.json; exit 0; fi
-          php -dmemory_limit=-1 app/vendor/bin/phpstan analyze --configuration app/config/phpstan.neon --error-format=gitlab --no-progress \$(git diff --name-only ${{ github.event.before }} ${{ github.event.after }}) > /workspace/phpstan.json 2>/dev/null
+          php -dmemory_limit=-1 app/vendor/bin/phpstan analyze --configuration app/config/phpstan.neon --error-format=json --no-progress \$(git diff --name-only ${{ github.event.before }} ${{ github.event.after }}) > /workspace/phpstan.json 2>/dev/null
           "
       - name: Upload PHPStan results
+        if: failure()
         uses: actions/upload-artifact@v4
         with:
           name: phpstan.json
