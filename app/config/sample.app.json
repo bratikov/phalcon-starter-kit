@@ -1,7 +1,7 @@
 {
 	"application": {
         "sentryDsn": "##SENTRY_DSN##",
-        "enviroment": "##APPENV##",
+        "environment": "##APPENV##",
         "timeZone": "##TIMEZONE##"
     },
     "database": {
