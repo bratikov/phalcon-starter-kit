@@ -11,6 +11,7 @@
     },
     "require": {
         "guzzlehttp/guzzle": "^7.9",
-        "sentry/sdk": "^4.0"
+        "sentry/sdk": "^4.0",
+        "league/openapi-psr7-validator": "^0.22.0"
     }
 }

@@ -15,6 +15,11 @@ abstract class AbstractManager
 
 	abstract public static function getVersion(): string;
 
+	public static function getOASchema(): string
+	{
+		return realpath(__DIR__.'/../../docs').'/api_'.static::getVersion().'.json';
+	}
+
 	public static function produce(string $version): ?AbstractManager
 	{
 		$manager = "App\\Endpoints\\{$version}\\Manager";

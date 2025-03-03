@@ -14,7 +14,7 @@ final class DummyTest extends TestCase
 {
 	public function testEnvironment(): void
 	{
-		/** @var \App\Utils\ConfigStub $config */
+		/** @var \App\Schemas\System\Config $config */
 		$config = Di::getDefault()?->getShared('config');
 		$this->assertArrayHasKey('application', $config->toArray());
 		$this->assertArrayHasKey('database', $config->toArray());
