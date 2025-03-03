@@ -7,7 +7,6 @@ services:
       - ./volumes/mysql/data:/var/lib/mysql
     environment:
       - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
-      - TZ=${TIMEZONE}
     networks:
       app:
         ipv4_address: 172.31.${IPPREF}.2
@@ -20,7 +19,6 @@ services:
     volumes:
       - ./app:/var/www/html/app
     environment:
-      - TZ=${TIMEZONE}
       - APPENV=${APPENV}
     networks:
       app:
@@ -33,8 +31,6 @@ services:
     hostname: nginx
     volumes:
       - ./app:/var/www/html/app
-    environment:
-      - TZ=${TIMEZONE}
     ports:
       - 127.0.0.1:5${SUID}${APP_DPORT}:888
     networks:
@@ -49,8 +45,6 @@ services:
     command: /bin/sh -c "redis-server --requirepass ${REDIS_PASSWORD}"
     volumes:
       - ./volumes/redis/data:/data
-    environment:
-      - TZ=${TIMEZONE}
     networks:
       app:
         ipv4_address: 172.31.${IPPREF}.5
@@ -61,7 +55,6 @@ services:
     container_name: pma
     hostname: pma
     environment:
-      - TZ=${TIMEZONE}
       - PMA_HOST=mysql
       - PMA_PORT=3306
     ports:
@@ -84,7 +77,6 @@ services:
       - ./app/docs/api_v2.json:/v2.json
     environment:
       - SWAGGER_JSON=/v1.json
-      - TZ=${TIMEZONE}
     networks:
       app:
         ipv4_address: 172.31.${IPPREF}.7

@@ -1,8 +1,13 @@
 {
 	"application": {
+        "sitename": "##SITENAME##",
         "sentryDsn": "##SENTRY_DSN##",
-        "environment": "##APPENV##",
-        "timeZone": "##TIMEZONE##"
+        "enviroment": "##APPENV##",
+        "secret": "##APP_SECRET##",
+        "jwt": {
+            "expires": "##APP_JWT_EXPIRES##",
+            "secret": "##APP_JWT_SECRET##"
+        }
     },
     "database": {
 		"adapter": "Mysql",

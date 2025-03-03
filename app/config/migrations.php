@@ -3,7 +3,7 @@
 define('APP_PATH', __DIR__.'/../../app');
 define('APPENV', getenv('APPENV') ?: 'local');
 
-use App\Utils\ConfigStub;
+use App\Schemas\System\Config;
 use Phalcon\Autoload\Loader;
 
 $loader = new Loader();
@@ -11,7 +11,7 @@ $loader
 	->setDirectories([APP_PATH.'/src/'])
 	->setNamespaces(['App' => APP_PATH.'/src/'])
 	->register();
-$config = ConfigStub::load();
+$config = Config::load();
 
 return new Phalcon\Config\Config([
 	'database' => $config->database->toArray(),

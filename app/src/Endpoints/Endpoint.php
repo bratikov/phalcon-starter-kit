@@ -4,63 +4,81 @@ declare(strict_types=1);
 
 namespace App\Endpoints;
 
-use App\Utils\Response;
-use Phalcon\Filter\Validation;
 use Phalcon\Http\Response as HttpResponse;
 use Phalcon\Http\ResponseInterface;
 use Phalcon\Mvc\Controller;
 
+/**
+ * @property \Phalcon\Config\Config        $config
+ * @property \Phalcon\Mvc\Url              $url
+ * @property \Phalcon\Db\Adapter\Pdo\Mysql $db
+ * @property \Phalcon\Http\Request         $request
+ * @property HttpResponse                  $response
+ * @property \Redis                        $redis
+ * @property \App\Schemas\System\Identity  $identity
+ */
 class Endpoint extends Controller
 {
+	private const DEFAULT_ERROR_CODE = 400;
+
 	/** @var array<string> */
 	protected $validationMessages = [];
 
 	/**
+	 * @var array<int, string>
+	 */
+	public static $codes = [
+		HttpResponse::STATUS_OK => 'OK',
+		HttpResponse::STATUS_BAD_REQUEST => 'Bad Request',
+		HttpResponse::STATUS_UNAUTHORIZED => 'Unauthorized',
+		HttpResponse::STATUS_NOT_FOUND => 'Not Found',
+		HttpResponse::STATUS_CONFLICT => 'Conflict',
+		HttpResponse::STATUS_INTERNAL_SERVER_ERROR => 'Server error',
+		HttpResponse::STATUS_NO_CONTENT => 'No Content',
+		HttpResponse::STATUS_CREATED => 'Created',
+	];
+
+	/**
 	 * @param array<mixed> $payload
 	 */
-	protected function respondOk(array $payload = [], string $msg = ''): ResponseInterface|bool
+	protected function respondOk(array|object $payload = []): ResponseInterface|bool
 	{
-		if (empty($msg)) {
-			$msg = 'Request completed successfully';
-		}
+		return self::send($this->response, HttpResponse::STATUS_OK, $payload);
+	}
 
-		return Response::send($this->response, HttpResponse::STATUS_OK, $msg, $payload);
+	protected function respondCreated(): ResponseInterface|bool
+	{
+		return self::send($this->response, HttpResponse::STATUS_CREATED);
+	}
+
+	protected function respondNoContent(): ResponseInterface|bool
+	{
+		return self::send($this->response, HttpResponse::STATUS_NO_CONTENT);
+	}
+
+	protected function respondBadRequest(string $message): ResponseInterface|bool
+	{
+		return self::send($this->response, HttpResponse::STATUS_BAD_REQUEST, new Error(['message' => $message]));
+	}
+
+	protected function respondInternalServerError(string $message = 'Internal Server Error'): ResponseInterface|bool
+	{
+		return self::send($this->response, HttpResponse::STATUS_INTERNAL_SERVER_ERROR, new Error(['message' => $message]));
 	}
 
 	/**
 	 * @param array<mixed> $payload
 	 */
-	protected function respondBadRequest(
-		string $msg = '',
-		array $payload = [],
-		int $httpCode = HttpResponse::STATUS_BAD_REQUEST
-	): ResponseInterface|bool {
-		return Response::send($this->response, $httpCode, $msg, $payload);
-	}
-
-	/**
-	 * @param array<mixed> $data
-	 */
-	protected function isValidRequest(Validation $validator, array $data = []): bool
+	public static function send(HttpResponse &$response, int $code, array|object $payload = []): ResponseInterface|bool
 	{
-		if (empty($data)) {
-			return false;
+		$code = $code ?: self::DEFAULT_ERROR_CODE;
+		$status = self::$codes[$code] ?? 'unknown';
+
+		$resp = $response->setContentType('application/json', 'UTF-8')->setStatusCode($code, $status);
+		if (!in_array($code, [HttpResponse::STATUS_NO_CONTENT, HttpResponse::STATUS_CREATED])) {
+			$resp->setJsonContent($payload);
 		}
 
-		$messages = (new $validator())->validate($data);
-		if (count($messages) > 0) {
-			foreach ($messages as $message) {
-				$this->validationMessages[] = $message->getMessage();
-			}
-
-			return false;
-		}
-
-		return true;
-	}
-
-	protected function getDefaultValidationErrorsResponse(): ResponseInterface|bool
-	{
-		return $this->respondBadRequest('Validation error(s)', $this->validationMessages);
+		return $resp->sendHeaders();
 	}
 }

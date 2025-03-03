@@ -4,10 +4,11 @@
 declare(strict_types=1);
 
 define('APP_PATH', __DIR__.'/../..');
+define('APPENV', getenv('APPENV') ?: 'local');
 
 require_once APP_PATH.'/vendor/autoload.php';
 
-use App\Utils\Di;
+use App\Services\Di;
 use Phalcon\Autoload\Loader;
 use Phalcon\Cli\Console;
 use Phalcon\Cli\Dispatcher;

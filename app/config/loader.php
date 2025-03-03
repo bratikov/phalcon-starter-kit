@@ -4,7 +4,6 @@ define('APP_PATH', __DIR__.'/../../app');
 define('APPENV', getenv('APPENV') ?: 'local');
 
 ini_set('log_errors', 1);
-ini_set('date.timezone', getenv('TZ') ?: 'UTC');
 if (APPENV === 'local') {
 	error_reporting(E_ALL);
 	ini_set('display_errors', 1);
@@ -14,7 +13,7 @@ if (APPENV === 'local') {
 
 require_once APP_PATH.'/vendor/autoload.php';
 
-use App\Utils\Di;
+use App\Services\Di;
 use Phalcon\Autoload\Loader;
 use Phalcon\Di\FactoryDefault;
 

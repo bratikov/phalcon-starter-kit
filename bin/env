@@ -13,7 +13,7 @@ fi
 
 USERNAME="$(whoami)"
 UUID="$(id -u)"
-SUID=`echo $UUID | tail -c 3`
+SUID=`echo $UUID | tail -c 3 | awk '{ sub(/^0+/, ""); print }'`
 IPPREF="$(($SUID + 1))"
 ENVPARAMS="-f docker-compose.yml"
 if [ "$APPENV" != "local"  ]; then
